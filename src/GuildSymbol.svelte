@@ -1,6 +1,7 @@
 <script>
-    import { blur, draw } from 'svelte/transition'
+    import { blur, fly, draw } from 'svelte/transition'
     import { Phase } from './Phase'
+    import { Stone } from './Stone'
 
     const DRAG_FACTOR = 1
     const DRAG_SNAP_THRESHOLD = 135
@@ -13,6 +14,7 @@
         x: 0, y: 0
     }
     let rotation = 0
+    let stonesActivated = {}
 
     $: {
         if (phase === Phase.Snapped) {
@@ -52,6 +54,12 @@
             if (rotation >= DRAG_SNAP_THRESHOLD)
                 endDrag()
         }
+    }
+
+    const clickStone = (stone) => () => {
+        stonesActivated = Object.assign({}, stonesActivated, {
+            [stone]: true
+        })
     }
 </script>
 
@@ -106,6 +114,16 @@
             </g>
         {/if}
     </svg>
+    {#if phase >= Phase.Revealed}
+        <div in:fly={{ y: 66, delay: 2500 }} class="stones">
+            <img class:activated={stonesActivated[Stone.Dusk]} on:click={clickStone(Stone.Dusk)} id="dusk-stone" src="/assets/dusk-stone.png" alt="Dusk Stone" />
+            <img class:activated={stonesActivated[Stone.Sol]} on:click={clickStone(Stone.Sol)} id="sol-stone" src="/assets/sol-stone.png" alt="Sol Stone" />
+            <img class:activated={stonesActivated[Stone.Leaf]} on:click={clickStone(Stone.Leaf)} id="leaf-stone" src="/assets/leaf-stone.png" alt="Leaf Stone" />
+            <img class:activated={stonesActivated[Stone.Ice]} on:click={clickStone(Stone.Ice)} id="ice-stone" src="/assets/ice-stone.png" alt="Ice Stone" />
+            <img class:activated={stonesActivated[Stone.Thunder]} on:click={clickStone(Stone.Thunder)} id="thunder-stone" src="/assets/thunder-stone.png" alt="Thunder Stone" />
+            <img class:activated={stonesActivated[Stone.Dawn]} on:click={clickStone(Stone.Dawn)} id="dawn-stone" src="/assets/dawn-stone.png" alt="Dawn Stone" />
+        </div>
+    {/if}
 </article>
 
 <style>
@@ -171,6 +189,91 @@
         fill: none;
     }
 
+    .stones {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
+    }
+
+    .stones img {
+        position: absolute;
+        max-width: 12vmin;
+        transition: top 1800ms ease-in-out, left 1800ms ease-in-out, max-width 1800ms linear;
+        animation: ambient-float 8s ease-in-out;
+        animation-iteration-count: infinite;
+    }
+
+    .stones .activated {
+        max-width: 8vmin;
+        animation: none;
+    }
+
+    #dusk-stone {
+        top: 5vmin;
+        left: -20vmin;
+    }
+
+    #dusk-stone.activated {
+        top: 38vmin;
+        left: 85.5vmin;
+    }
+
+    #sol-stone {
+        top: 40vmin;
+        left: -20vmin;
+        animation-delay: -1s;
+    }
+
+    #sol-stone.activated {
+        top: 15.5vmin;
+        left: 20vmin;
+    }
+
+    #leaf-stone {
+        top: 70vmin;
+        left: -20vmin;
+        animation-delay: -2s;
+    }
+
+    #leaf-stone.activated {
+        top: 65vmin;
+        left: 80.5vmin;
+    }
+
+    #ice-stone {
+        top: 5vmin;
+        left: 108vmin;
+        animation-delay: -0.5s;
+    }
+
+    #ice-stone.activated {
+        top: 84vmin;
+        left: 59vmin;
+    }
+
+    #thunder-stone {
+        top: 40vmin;
+        left: 108vmin;
+        animation-delay: -2.5s;
+    }
+
+    #thunder-stone.activated {
+        top: 5.5vmin;
+        left: 46vmin;
+    }
+
+    #dawn-stone {
+        top: 70vmin;
+        left: 108vmin;
+        animation-delay: -1.5s;
+    }
+
+    #dawn-stone.activated {
+        top: 39.5vmin;
+        left: 7vmin;
+    }
+
     @keyframes shadow-burst {
         from {
             filter: drop-shadow(0 0 0 rgba(var(--color-power), 1));
@@ -193,5 +296,12 @@
         80% { top: -0.4%; left: 0.6%; }
         90% { top: -0.1%; left: -0.3%; }
         100% { top: 0%; left: 0%; }
+    }
+
+    @keyframes ambient-float {
+        0% { transform: translate(0, 0); }
+        33% { transform: translate(0, 1vmin); }
+        66% { transform: translate(0, -0.5vmin); }
+        100% { transform: translate(0, 0); }
     }
 </style>
