@@ -1,3 +1,7 @@
+:root {
+	--pokedex-font: 'Syne Mono', monospace;
+}
+
 html, body {
 	position: relative;
 	width: 100%;

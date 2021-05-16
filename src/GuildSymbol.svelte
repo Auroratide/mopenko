@@ -2,6 +2,7 @@
     import { blur, fly, draw } from 'svelte/transition'
     import { Phase } from './Phase'
     import { Stone } from './Stone'
+    import PokedexEntry from './PokedexEntry.svelte'
 
     const DRAG_FACTOR = 1
     const DRAG_SNAP_THRESHOLD = 135
@@ -15,12 +16,24 @@
     }
     let rotation = 0
     let stonesActivated = {}
+    let showPokedexEntry = null
+    let showCarnot = false
+
+    const activateCarnot = (e) => {
+        console.log(e.key)
+        if (e.key === 'g') {
+            showPokedexEntry = null
+            setTimeout(() => showCarnot = true, 800)
+        }
+    }
 
     $: {
         if (phase === Phase.Snapped) {
             setTimeout(() => phase = Phase.Mapped, 1000)
         } else if (phase === Phase.Mapped) {
             setTimeout(() => phase = Phase.Revealed, 1500)
+        } else if (phase === Phase.Revealed) {
+            document.body.addEventListener('keyup', activateCarnot)
         }
     }
 
@@ -56,17 +69,35 @@
         }
     }
 
-    const clickStone = (stone) => () => {
+    const activateStone = (stone) => {
         stonesActivated = Object.assign({}, stonesActivated, {
             [stone]: true
         })
+
+        setTimeout(() => showPokedexEntry = stone, 2000)
+    }
+
+    const clickStone = (stone) => () => {
+        showCarnot = false
+        if (showPokedexEntry !== null) {
+            showPokedexEntry = null
+            setTimeout(() => activateStone(stone), 400)
+        } else {
+            activateStone(stone)
+        }
     }
 </script>
 
 <div class="preloading">
     <img class="bg" src="/assets/parchment.jpg" alt="parchment" />
-    <img class="bg" src="/assets/land.jpg" alt="land" />
     <img class="bg" src="/assets/landmarks.jpg" alt="landmarks" />
+    <img src="/assets/spiritomb.jpg" alt="spiritomb" />
+    <img src="/assets/swalot.jpg" alt="swallot" />
+    <img src="/assets/venomoth.png" alt="venomoth" />
+    <img src="/assets/oddish.jpg" alt="oddish" />
+    <img src="/assets/durant.png" alt="durant" />
+    <img src="/assets/drednaw.jpg" alt="drednaw" />
+    <img src="/assets/politoed.jpg" alt="politoed" />
 </div>
 <article class="container" class:snapped={phase === Phase.Snapped}>
     {#if phase < Phase.Mapped}
@@ -124,6 +155,23 @@
             <img class:activated={stonesActivated[Stone.Dawn]} on:click={clickStone(Stone.Dawn)} id="dawn-stone" src="/assets/dawn-stone.png" alt="Dawn Stone" />
         </div>
     {/if}
+    <section class="pokedex-entries">
+        {#if showCarnot}
+            <PokedexEntry name="Politoed" text="Nyorotono, the Frog Kaijin. Nyorotono likes to expand its throat and sing out, drawing in Nyoromo and Nyorozo from all around." />
+        {:else if showPokedexEntry === Stone.Sol}
+            <PokedexEntry name="Spiritomb" text="Mikaruge, the Forbidden Kaijin. As punishment for misdeeds, it was imprisoned in the fissure of an Odd Keystone." />
+        {:else if showPokedexEntry === Stone.Ice}
+            <PokedexEntry name="Swalot" text="Marunoom, the Poison Bag Kaijin. Marunoom has a body that can expand and contract at will, and can swallow anything whole." />
+        {:else if showPokedexEntry === Stone.Dusk}
+            <PokedexEntry name="Venomoth" text="Morphon, an evolved form of Kongpang. Tiny scales on its wings disperse various spores when they are flapped." ext="png" />
+        {:else if showPokedexEntry === Stone.Leaf}
+            <PokedexEntry name="Oddish" text="Nazonokusa. This Kaijin is typically found roaming the forest, scattering rafureshia as it walks around." />
+        {:else if showPokedexEntry === Stone.Thunder}
+            <PokedexEntry name="Durant" text="Aiant, the Iron Ant Kaijin. Aiant build twisting tunnels in the mountains where they form their nests. They are covered with a steel armor for protection." ext="png" />
+        {:else if showPokedexEntry === Stone.Dawn}
+            <PokedexEntry name="Drednaw" text="Kajirigame, the Bite Kaijin. With jaws that can shear through steel rods, this highly aggressive Kaijin chomps down on its unfortunate prey." />
+        {/if}
+    </section>
 </article>
 
 <style>
@@ -272,6 +320,14 @@
     #dawn-stone.activated {
         top: 39.5vmin;
         left: 7vmin;
+    }
+
+    .pokedex-entries {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 4;
+        width: 100%;
     }
 
     @keyframes shadow-burst {
